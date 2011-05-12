@@ -11,7 +11,7 @@ module TableMigrator
     PAUSE_LENGTH = 5
 
     def initialize(strategy)
-      self.strategy = strategy 
+      self.strategy = strategy
 
       #updated_at sanity check
       unless dry_run? or strategy.column_names.include?(delta_column.to_s)
@@ -94,7 +94,7 @@ module TableMigrator
       page = 0
       loop do
         info "page #{page += 1}..."
-        execute(paged_copy_query(start, PAGE_SIZE))
+        cpu_friendly { execute(paged_copy_query(start, PAGE_SIZE)) }
 
         new_start = if dry_run?
           0
@@ -231,6 +231,9 @@ module TableMigrator
       strategy.config[:multi_pass] == true
     end
 
+    def cpu_friendly?
+      strategy.config[:cpu_friendly] == true
+    end
 
     # SQL Execution
 
@@ -277,6 +280,14 @@ module TableMigrator
           execute('SET autocommit=1')
         end
       end
+    end
+
+    private
+
+    def cpu_friendly(&block)
+      started_at = Time.now
+      block.call
+      sleep(Time.now - started_at) if cpu_friendly?
     end
   end
 end

@@ -48,6 +48,9 @@ TableMigrator supports two APIs for defining migrations. One uses ActiveRecord's
       #                        for details. Defaults to true.
       #   :dry_run           - If true, the migration will not actually run, just emit
       #                        fake progress to the log. Defaults to false.
+      #   :cpu_friendly      - If true, sleep for few seconds between each request
+      #                        in order to not burn database CPU. However copy will
+      #                        be 2 times longer. Default to false.
 
       change_table do |t|
         t.integer :foo, :null => false, :default => 0
