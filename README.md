@@ -48,6 +48,8 @@ TableMigrator supports two APIs for defining migrations. One uses ActiveRecord's
       #                        for details. Defaults to true.
       #   :dry_run           - If true, the migration will not actually run, just emit
       #                        fake progress to the log. Defaults to false.
+      #   :delta_column      - If records are immutable set this option to 'created_at'.
+      #                        Default to 'updated_at'
 
       change_table do |t|
         t.integer :foo, :null => false, :default => 0
