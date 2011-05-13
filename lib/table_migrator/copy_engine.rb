@@ -69,7 +69,8 @@ module TableMigrator
     # performs only the table creation and copy phases so that the actual migration
     # is as quick as possible.
     def create_table_and_copy_info
-      create_new_table
+      save_epoch
+      create_new_table unless new_table_exists?
       paged_copy
       multi_pass_delta_copy if multi_pass?
     end
@@ -160,6 +161,26 @@ module TableMigrator
       @next_epoch = self.next_epoch
       info "Current Epoch starts at: #{@next_epoch}"
       epoch
+    end
+
+    def save_epoch
+      unless File.exists?(epoch_file_path)
+        File.open(epoch_file_path, 'w') { |file| file.write(Time.now) }
+      end
+    end
+
+    def recover_epoch
+      if File.exists?(epoch_file_path)
+        set_epoch(Time.parse(File.read(epoch_file_path)))
+      end
+    end
+
+    def remove_saved_epoch
+      File.delete(epoch_file_path) if File.exists?(epoch_file_path)
+    end
+
+    def epoch_file_path
+      Rails.root.join('tmp/table_migrator.epoch')
     end
 
     def last_epoch
@@ -288,6 +309,10 @@ module TableMigrator
       started_at = Time.now
       block.call
       sleep(Time.now - started_at) if cpu_friendly?
+    end
+
+    def new_table_exists?
+      execute("show tables like '#{new_table_name}'").num_rows > 0
     end
   end
 end

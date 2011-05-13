@@ -6,14 +6,16 @@ module TableMigrator
 
     def initialize(table, config = {})
       self.table = table
-      
+
       defaults = { :dry_run => false, :create_temp_table => true, :delta_column => 'updated_at'}
       self.config = defaults.merge(config)
     end
 
     def up!
+      engine.recover_epoch
       engine.set_epoch(Time.parse(ENV['NEXT_EPOCH'])) if !ENV['NEXT_EPOCH'].blank?
       engine.up!
+      engine.remove_saved_epoch
     end
 
     def down!
@@ -47,7 +49,7 @@ module TableMigrator
       else
         columns = quoted_column_names
       end
-      
+
       @base_copy_query ||= %(INSERT INTO :new_table_name (#{columns.join(", ")}) SELECT #{columns.join(", ")} FROM :table_name)
     end
 
