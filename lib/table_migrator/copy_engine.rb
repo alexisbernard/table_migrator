@@ -252,8 +252,8 @@ module TableMigrator
       strategy.config[:multi_pass] == true
     end
 
-    def cpu_friendly?
-      strategy.config[:cpu_friendly] == true
+    def cpu_friendly_ratio
+      strategy.config[:cpu_friendly_ratio] || 0
     end
 
     # SQL Execution
@@ -308,7 +308,7 @@ module TableMigrator
     def cpu_friendly(&block)
       started_at = Time.now
       block.call
-      sleep(Time.now - started_at) if cpu_friendly?
+      sleep((Time.now - started_at) * cpu_friendly_ratio) if cpu_friendly_ratio > 0
     end
 
     def new_table_exists?

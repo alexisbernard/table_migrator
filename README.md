@@ -38,19 +38,21 @@ TableMigrator supports two APIs for defining migrations. One uses ActiveRecord's
 
       migrates :users
       # migrates also can take an options hash:
-      #   :multi_pass        - See explanation above. Defaults to true
-      #   :migration_name    - the original table is not dropped after the migration.
-      #                        It will instead have a name based on this option.
-      #                        The default is based on the migration class. (The old table
-      #                        will end up named 'users_before_add_stuff_to_my_big_table'
-      #                        in this case)
-      #   :create_temp_table - Performs the migration in two steps if false. Read below
-      #                        for details. Defaults to true.
-      #   :dry_run           - If true, the migration will not actually run, just emit
-      #                        fake progress to the log. Defaults to false.
-      #   :cpu_friendly      - If true, sleep for few seconds between each request
-      #                        in order to not burn database CPU. However copy will
-      #                        be 2 times longer. Default to false.
+      #   :multi_pass         - See explanation above. Defaults to true
+      #   :migration_name     - the original table is not dropped after the migration.
+      #                         It will instead have a name based on this option.
+      #                         The default is based on the migration class. (The old table
+      #                         will end up named 'users_before_add_stuff_to_my_big_table'
+      #                         in this case)
+      #   :create_temp_table  - Performs the migration in two steps if false. Read below
+      #                         for details. Defaults to true.
+      #   :dry_run            - If true, the migration will not actually run, just emit
+      #                         fake progress to the log. Defaults to false.
+      #   :cpu_friendly_ratio - If greater than zero, sleep for few seconds between
+      #                         each request according the following formula:
+      #                         sleep_duration = copy_duration * ratio
+      #                         The idea is to avoid burning database CPU. However
+      #                         table copy will be longer. Default to 0.
 
       change_table do |t|
         t.integer :foo, :null => false, :default => 0
